@@ -154,7 +154,13 @@ class CPU:
                     self.pc = self.reg[self.ram[self.pc + 1]]
                 else:
                     self.pc += 2
-
+            elif ir == 0b10101000:
+                self.reg[self.ram[self.pc + 1]] = self.reg[self.ram[self.pc + 1]] & self.reg[self.ram[self.pc + 2]]
+                self.pc += 3
+            elif ir == 0b10101010:
+                self.reg[self.ram[self.pc + 1]] = self.reg[self.ram[self.pc + 1]] | self.reg[self.ram[self.pc + 2]]
+                self.pc += 3
+            
 
 
 
