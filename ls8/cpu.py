@@ -98,10 +98,8 @@ class CPU:
     def run(self):
         """Run the CPU."""
         
-        while self.running:
-            
+        while self.running:           
             ir = self.ram[self.pc]
-
             if ir == 0b00000001: 
                 self.running = False
                 self.pc += 1
@@ -130,7 +128,6 @@ class CPU:
                 reg_num = self.ram[self.pc + 1]
                 self.reg[reg_num] = self.ram[self.reg[self.sp]]
                 self.reg[self.sp] += 1
-
                 self.pc+=2
             elif ir == 0b01010000:
                 self.reg[self.sp] -= 1
@@ -154,7 +151,6 @@ class CPU:
                     self.pc += 2
             elif ir == 0b01010110:
                 if self.fl != 0b00000001:
-                    
                     self.pc = self.reg[self.ram[self.pc + 1]]
                 else:
                     self.pc += 2
