@@ -13,10 +13,11 @@ class CPU:
         self.ir = None
         self.mar = None
         self.mdr = None
-
         self.reg = [0] * 8
+        self.sp = 7
+        self.reg[self.sp] = 0xf4
         self.running = True
-        #self.
+        
 
 
     def load(self):
@@ -114,6 +115,21 @@ class CPU:
                 reg_b = self.ram[self.pc+2]
                 self.alu('MUL',  reg_a, reg_b)
                 self.pc +=3
+            elif ir == 0b01000101:
+                self.reg[self.sp] -= 1
+                value = self.reg[self.ram[self.pc + 1]]
+                top_of_stack_addr = self.reg[self.sp]
+                self.ram[top_of_stack_addr] = value
+                self.pc += 2
+            elif ir == 0b01000110:
+                reg_num = self.ram[self.pc + 1]
+                self.reg[reg_num] = self.ram[self.reg[self.sp]]
+                self.reg[self.sp] += 1
+
+                self.pc+=2
+
+
+
             
 
 
@@ -127,7 +143,3 @@ class CPU:
         self.ram[addr] = value 
         return 
 
-    def ldi(register, value):
-        reg_num = self.ram[self.pc+1]
-        register[reg_num] = value
-        pc += 3
