@@ -14,17 +14,30 @@ class CPU:
         self.mar = None
         self.mdr = None
 
-        self.r0 = [0] * 8
+        self.reg = [0] * 8
         self.running = True
         #self.
 
 
     def load(self):
         """Load a program into memory."""
+        
         address = 0
-
+        if len(sys.argv) < 2: 
+            print('nope')
+            sys.exit(1)
+        with open(sys.argv[1]) as f:
+            for line in f:
+                line = line.split("#")
+                try:
+                    v = int(line[0],2)
+                except ValueError:
+                    continue
+                self.ram[address] = v
+                address += 1
+        #sys.exit(0)
         # For now, we've just hardcoded a program:
-
+        """
         program = [
             # From print8.ls8
             0b10000010, # LDI R0,8
@@ -38,14 +51,20 @@ class CPU:
         for instruction in program:
             self.ram[address] = instruction
             address += 1
+        """
 
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
+        print('in alu')
+        print(op)
+        print(reg_a)
+        print(reg_b)
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
+            print(self.reg[reg_a])
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -73,24 +92,28 @@ class CPU:
         """Run the CPU."""
         
         while self.running:
-           
             
             ir = self.ram[self.pc]
 
             if ir == 0b00000001: 
+             
                 self.running = False
                 self.pc += 1
                 sys.exit(1)
             elif ir == 0b10000010:
                 reg_num = self.ram[self.pc+1]
                 value = self.ram[self.pc+2]
-                self.ram[reg_num] = value
+                self.reg[reg_num] = value
                 self.pc += 3
             elif ir == 0b01000111:
                 reg_num = self.ram[self.pc+1]
-                print(self.ram[reg_num])
+                print(self.reg[reg_num])
                 self.pc += 2
-
+            elif ir == 0b10100010:
+                reg_a = self.ram[self.pc+1]
+                reg_b = self.ram[self.pc+2]
+                self.alu('MUL',  reg_a, reg_b)
+                self.pc +=3
             
 
 
