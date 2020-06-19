@@ -16,6 +16,7 @@ class CPU:
         self.reg = [0] * 8
         self.sp = 7
         self.reg[self.sp] = 0xf4
+        self.fl = 0b00000000
         self.running = True
         
 
@@ -57,15 +58,20 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-        print('in alu')
-        print(op)
-        print(reg_a)
-        print(reg_b)
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         elif op == "MUL":
             self.reg[reg_a] = self.reg[reg_a] * self.reg[reg_b]
-            print(self.reg[reg_a])
+        elif op == "CMP":
+        
+            if(self.reg[reg_a]>self.reg[reg_b]):
+                self.fl = 0b00000010
+            elif (self.reg[reg_a] < self.reg[reg_b]):
+                self.fl = 0b00000100                
+               
+            else:
+                
+                self.fl = 0b00000001
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -97,7 +103,6 @@ class CPU:
             ir = self.ram[self.pc]
 
             if ir == 0b00000001: 
-             
                 self.running = False
                 self.pc += 1
                 sys.exit(1)
@@ -127,6 +132,34 @@ class CPU:
                 self.reg[self.sp] += 1
 
                 self.pc+=2
+            elif ir == 0b01010000:
+                self.reg[self.sp] -= 1
+                self.ram[self.reg[self.sp]] = self.pc + 2
+                subroutine_addr = self.reg[self.pc + 1]
+                self.pc = subroutine_addr
+            elif ir == 0b00010001:
+                self.pc = self.ram[self.reg[self.sp]]
+                self.reg[self.sp] += 1
+            elif ir == 0b10100111:
+                reg_a = self.ram[self.pc+1]
+                reg_b = self.ram[self.pc+2]
+                self.alu('CMP', reg_a, reg_b)
+                self.pc +=3
+            elif ir == 0b01010100:
+                self.pc = self.reg[self.ram[self.pc + 1]]
+            elif ir == 0b01010101:
+                if self.fl == 0b00000001:
+                    self.pc = self.reg[self.ram[self.pc + 1]]
+                else:
+                    self.pc += 2
+            elif ir == 0b01010110:
+                if self.fl != 0b00000001:
+                    
+                    self.pc = self.reg[self.ram[self.pc + 1]]
+                else:
+                    self.pc += 2
+
+
 
 
 
@@ -142,4 +175,7 @@ class CPU:
     def ram_write(value, addr):
         self.ram[addr] = value 
         return 
+    # credit for this function is due to lucidprogramming's channel on yt
+    def toggle_nth_bit(self, x:int, n:int):
+        return x ^ (1 << n)
 
